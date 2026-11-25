@@ -1,0 +1,9 @@
+{"type":"FeatureCollection","features":[
+{"type":"Feature","properties":{"name":"Main Road"},"geometry":{"type":"LineString","coordinates":[[91.280,23.830],[91.285,23.830]]}},
+{"type":"Feature","properties":{"name":"Station Road"},"geometry":{"type":"LineString","coordinates":[[91.285,23.830],[91.290,23.832]]}},
+{"type":"Feature","properties":{"name":"Highway Link"},"geometry":{"type":"LineString","coordinates":[[91.290,23.832],[91.295,23.835]]}},
+{"type":"Feature","properties":{"name":"Market Street (repeated node)"},"geometry":{"type":"LineString","coordinates":[[91.290,23.832],[91.292,23.8305],[91.292,23.8305],[91.294,23.829]]}},
+{"type":"Feature","properties":{"name":"Isolated Lane"},"geometry":{"type":"LineString","coordinates":[[91.300,23.840],[91.305,23.842]]}},
+{"type":"Feature","properties":{"name":"Main Road (duplicate)"},"geometry":{"type":"LineString","coordinates":[[91.280,23.830],[91.285,23.830]]}},
+{"type":"Feature","properties":{"name":"Broken Road (invalid)"},"geometry":{"type":"LineString","coordinates":[[91.286,23.826],[91.286,23.826]]}}
+]}

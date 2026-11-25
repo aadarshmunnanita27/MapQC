@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MapQC Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; }
+    header { padding: 12px 16px; background: #1e3a8a; color: white; }
+    .bar { padding: 10px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    button { padding: 6px 12px; cursor: pointer; }
+    #map { height: 70vh; }
+    .tag { background: #fee2e2; padding: 2px 8px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    const api = (path, method = 'GET') => fetch('/api' + path, { method }).then(r => r.json());
+
+    function App() {
+      const mapDiv = useRef();
+      const map = useRef();
+      const layers = useRef(L.layerGroup());
+      const [summary, setSummary] = useState([]);
+
+      async function refresh() {
+        const roads = await api('/roads');
+        const issues = await api('/issues');
+        setSummary(await api('/summary'));
+        layers.current.clearLayers();
+        L.geoJSON(roads, {
+          style: { color: '#2563eb', weight: 4 },
+          onEachFeature: (f, l) => l.bindPopup(f.properties.name)
+        }).addTo(layers.current);
+        L.geoJSON(issues, {
+          pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 9, color: 'red', fillOpacity: 0.6 }),
+          onEachFeature: (f, l) => l.bindPopup(f.properties.type + ': ' + f.properties.description)
+        }).addTo(layers.current);
+      }
+
+      useEffect(() => {
+        map.current = L.map(mapDiv.current).setView([23.832, 91.29], 14);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map.current);
+        layers.current.addTo(map.current);
+        refresh();
+      }, []);
+
+      async function act(path, method) { await api(path, method); refresh(); }
+
+      return (
+        <div>
+          <header><h3 style={{ margin: 0 }}>MapQC - Map Data Quality Dashboard</h3></header>
+          <div className="bar">
+            <button onClick={() => act('/roads', 'DELETE')}>1. Clear data</button>
+            <button onClick={() => act('/roads/load-sample', 'POST')}>2. Load sample roads</button>
+            <button onClick={() => act('/validate', 'POST')}>3. Run validation</button>
+            {summary.map(s => <span key={s.issue_type} className="tag">{s.issue_type}: {s.total}</span>)}
+          </div>
+          <div id="map" ref={mapDiv}></div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
